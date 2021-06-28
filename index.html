@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二维码生成器</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+    <div id="app" style="width: 1200px; margin: 0 auto;">
+
+        <h1>🎉二维码生成器</h1>
+
+        <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+            <el-tab-pane label="文字" name="first">
+                文字内容：
+                <el-input type="textarea" v-model="form.text"></el-input>
+                <br>
+                <br>
+                <el-button @click="doConvert">生成二维码</el-button>
+            </el-tab-pane>
+            <el-tab-pane label="网址" name="second">
+                请输入网址：
+                <el-input placeholder="Please input" v-model="form.text">
+                    <template slot="prepend">http://</template>
+                </el-input>
+                <br>
+                <br>
+                <el-button @click="doConvert2">生成二维码</el-button>
+            </el-tab-pane>
+            <el-tab-pane label="其他" name="third">其他功能等待开发中...</el-tab-pane>
+        </el-tabs>
+
+        <canvas id="canvas"></canvas>
+
+        <br>
+
+        <a v-show="href!='#'" id="download" :href="href">
+            <el-button>下载</el-button>
+        </a>
+
+    </div>
+
+
+
+    <script src="./qrcode.min.js"></script>
+    <script src="./vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+
+    <script>
+        var qrcode = null
+
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    activeName: 'first',
+                    path: 0,
+                    form: {
+                        text: ''
+                    },
+                    href: '#'
+                }
+            },
+            methods: {
+                handleClick(tab, event) {
+                    // console.log(tab, event);
+                    this.form.text = ''
+                    document.getElementById('canvas').innerHTML = ''
+                },
+                convertMsg(msg) {
+                    QRCode.toCanvas(document.getElementById('canvas'), msg, function (error) {
+                        if (error) { return error }
+                        return true;
+                    })
+                },
+
+                downloadCanvas(link, canvasId, filename) {
+                    this.href = document.getElementById(canvasId).toDataURL();
+                    link.download = filename;
+                },
+
+                doConvert() {
+                    var res = this.convertMsg(this.form.text);
+
+                    this.downloadCanvas(document.getElementById('download'), 'canvas', '二维码.png')
+
+                    this.$notify({
+                        title: '成功',
+                        message: '成功生成二维码！',
+                        type: 'success'
+                    });
+                },
+                doConvert2() {
+                    var res = this.convertMsg("http://" + this.form.text);
+                    this.downloadCanvas(document.getElementById('download'), 'canvas', '二维码.png')
+                    this.$notify({
+                        title: '成功',
+                        message: '成功生成二维码！',
+                        type: 'success'
+                    });
+                }
+            }
+        })
+
+
+
+    </script>
+</body>
+
+</html>
